@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoPortfolio | QGIS Specialist</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --border: #1e2a38;
+    --accent: #00d4aa;
+    --accent2: #ff6b35;
+    --accent3: #4a9eff;
+    --text: #e8f0f8;
+    --muted: #6b7f94;
+    --card: #131c27;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* SCANLINE OVERLAY */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    padding: 60px 0 40px;
+    border-bottom: 1px solid var(--border);
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #00d4aa22, #4a9eff22);
+    border: 1px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(0,212,170,0.15));
+  }
+
+  .header-text h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--text);
+    line-height: 1.1;
+  }
+
+  .header-text h1 span {
+    color: var(--accent);
+  }
+
+  .tagline {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .badge {
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+  }
+
+  .badge-green { color: var(--accent); border-color: var(--accent); background: rgba(0,212,170,0.08); }
+  .badge-orange { color: var(--accent2); border-color: var(--accent2); background: rgba(255,107,53,0.08); }
+  .badge-blue { color: var(--accent3); border-color: var(--accent3); background: rgba(74,158,255,0.08); }
+
+  /* ─── SECTION TITLES ─── */
+  .section {
+    padding: 48px 0 0;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── ABOUT ─── */
+  .about-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 24px;
+    border-radius: 2px;
+    font-size: 15px;
+    line-height: 1.75;
+    color: #c0ccd8;
+  }
+
+  /* ─── SKILLS GRID ─── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 0;
+  }
+
+  .skill-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 2px;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+
+  .skill-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .skill-icon {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .skill-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .skill-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .skill-bar {
+    margin-top: 14px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .skill-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    animation: barGrow 1.2s ease both;
+    animation-delay: 0.4s;
+  }
+
+  /* ─── PROJECT ─── */
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .project-card:hover { border-color: var(--accent3); }
+
+  .project-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .project-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .project-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .project-status {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    background: rgba(0,212,170,0.08);
+  }
+
+  .project-desc {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #9aaab8;
+    line-height: 1.7;
+  }
+
+  .project-body {
+    padding: 20px 24px;
+  }
+
+  .project-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .meta-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    border-radius: 2px;
+  }
+
+  .meta-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .meta-value {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .workflow-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .workflow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 28px;
+    width: 1px;
+    height: calc(100% + 0px);
+    background: var(--border);
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent3);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  .step-content {
+    padding: 4px 0 20px;
+  }
+
+  .step-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .step-detail {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    line-height: 1.6;
+  }
+
+  .tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .tech-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .tech-tag:hover { color: var(--accent3); border-color: var(--accent3); }
+
+  /* ─── CODE SNIPPET ─── */
+  .code-block {
+    background: #080d12;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent3);
+    border-radius: 2px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    overflow-x: auto;
+  }
+
+  .code-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  pre {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    line-height: 1.8;
+    color: #c0ccd8;
+    white-space: pre;
+  }
+
+  .kw { color: #ff79c6; }
+  .fn { color: #50fa7b; }
+  .str { color: #f1fa8c; }
+  .cm { color: #6272a4; }
+  .num { color: #bd93f9; }
+
+  /* ─── CONTACT / FOOTER ─── */
+  .footer {
+    margin-top: 60px;
+    padding: 32px 0 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+    gap: 16px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .footer-left {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 16px;
+  }
+
+  .footer-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .footer-link:hover { border-color: var(--accent); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes barGrow {
+    from { width: 0; }
+  }
+
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.2s; }
+  .section:nth-child(4) { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <div class="avatar">🗺️</div>
+      <div class="header-text">
+        <h1>your-username<span>/</span>qgis-portfolio</h1>
+        <p class="tagline">// geospatial analyst · QGIS · PyQGIS · spatial data</p>
+        <div class="badge-row">
+          <span class="badge badge-green">Map Styling & Cartography</span>
+          <span class="badge badge-blue">Spatial Digitizing</span>
+          <span class="badge badge-orange">PyQGIS Scripting</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ABOUT -->
+  <div class="section">
+    <div class="section-label">About</div>
+    <div class="about-card">
+      Geospatial analyst with hands-on experience in QGIS for spatial data collection, digitizing, cartographic styling, and Python-based automation using PyQGIS. Focused on producing clean, accurate, and visually compelling geographic datasets and maps. Currently building skills in support of AI-assisted geospatial research and digital asset development.
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="section">
+    <div class="section-label">Core Skills</div>
+    <div class="skills-grid">
+
+      <div class="skill-card">
+        <div class="skill-icon">📍</div>
+        <div class="skill-name">Spatial Data Collection & Digitizing</div>
+        <div class="skill-desc">Vector digitizing from satellite/aerial imagery. Point, line, polygon feature creation. Attribute table management.</div>
+        <div class="skill-bar"><div class="skill-bar-fill" style="width:55%"></div></div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-icon">🎨</div>
+        <div class="skill-name">Map Styling & Cartography</div>
+        <div class="skill-desc">Symbology customization, layer blending, print layout composer, legend design, and export for publication.</div>
+        <div class="skill-bar"><div class="skill-bar-fill" style="width:60%"></div></div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-icon">🐍</div>
+        <div class="skill-name">PyQGIS Scripting</div>
+        <div class="skill-desc">Python console automation, layer loading/manipulation, batch processing with processing.run(), custom scripts.</div>
+        <div class="skill-bar"><div class="skill-bar-fill" style="width:45%"></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PROJECT -->
+  <div class="section">
+    <div class="section-label">Featured Project</div>
+    <div class="project-card">
+
+      <div class="project-header">
+        <div class="project-title-row">
+          <div class="project-title">Urban Land Use Digitizing & Map Production</div>
+          <span class="project-status">● COMPLETE</span>
+        </div>
+        <p class="project-desc">
+          End-to-end geospatial project using QGIS to digitize land use features from satellite imagery, classify and style vector layers by category, and produce a publication-ready cartographic map. PyQGIS scripts were used to automate layer symbolization and batch-export tiles.
+        </p>
+      </div>
+
+      <div class="project-body">
+
+        <div class="project-meta">
+          <div class="meta-item">
+            <div class="meta-label">Software</div>
+            <div class="meta-value">QGIS 3.x</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Data Type</div>
+            <div class="meta-value">Vector (Polygon)</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">CRS</div>
+            <div class="meta-value">EPSG:4326 / WGS84</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Output</div>
+            <div class="meta-value">GeoPackage + PDF Map</div>
+          </div>
+        </div>
+
+        <div class="workflow-title">// Workflow</div>
+        <div class="workflow-steps">
+          <div class="step">
+            <div class="step-num">01</div>
+            <div class="step-content">
+              <div class="step-title">Data Acquisition</div>
+              <div class="step-detail">Loaded OpenStreetMap base layer + high-res satellite imagery via QuickMapServices plugin.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">02</div>
+            <div class="step-content">
+              <div class="step-title">Digitizing</div>
+              <div class="step-detail">Created new GeoPackage layer. Digitized 150+ land use polygons across 6 categories (residential, commercial, green space, industrial, water, transport).</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">03</div>
+            <div class="step-content">
+              <div class="step-title">Attribute Classification</div>
+              <div class="step-detail">Populated attribute table with land_use, area_m2, and notes fields. Used Field Calculator for area auto-computation.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">04</div>
+            <div class="step-content">
+              <div class="step-title">Styling & Cartography</div>
+              <div class="step-detail">Applied categorized symbology by land_use type. Customized fill colors, outlines, transparency. Designed print layout with legend, scalebar, and north arrow.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">05</div>
+            <div class="step-content">
+              <div class="step-title">PyQGIS Automation</div>
+              <div class="step-detail">Wrote Python script to auto-apply color ramp to new layers and export each category as a separate PNG tile for use in AI training datasets.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CODE SNIPPET -->
+        <div class="code-block">
+          <div class="code-label">pyqgis_export.py — batch layer export snippet</div>
+          <pre><span class="cm"># Load layer and apply categorized renderer</span>
+layer = QgsProject.instance().<span class="fn">mapLayersByName</span>(<span class="str">'land_use'</span>)[<span class="num">0</span>]
+categories = []
+
+color_map = {
+    <span class="str">'residential'</span>: <span class="str">'#f4a261'</span>,
+    <span class="str">'commercial'</span>:  <span class="str">'#e76f51'</span>,
+    <span class="str">'green_space'</span>: <span class="str">'#2a9d8f'</span>,
+    <span class="str">'industrial'</span>:  <span class="str">'#264653'</span>,
+}
+
+<span class="kw">for</span> label, color <span class="kw">in</span> color_map.items():
+    sym = QgsSymbol.<span class="fn">defaultSymbol</span>(layer.geometryType())
+    sym.<span class="fn">setColor</span>(QColor(color))
+    cat = QgsRendererCategory(label, sym, label)
+    categories.<span class="fn">append</span>(cat)
+
+renderer = QgsCategorizedSymbolRenderer(<span class="str">'land_use'</span>, categories)
+layer.<span class="fn">setRenderer</span>(renderer)
+layer.<span class="fn">triggerRepaint</span>()</pre>
+        </div>
+
+        <div class="tech-tags">
+          <span class="tech-tag">QGIS 3.x</span>
+          <span class="tech-tag">PyQGIS</span>
+          <span class="tech-tag">GeoPackage</span>
+          <span class="tech-tag">OpenStreetMap</span>
+          <span class="tech-tag">Vector Digitizing</span>
+          <span class="tech-tag">Print Layout</span>
+          <span class="tech-tag">Field Calculator</span>
+          <span class="tech-tag">EPSG:4326</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">📌 Open to AI geospatial research collaborations</div>
+    <div class="footer-links">
+      <a class="footer-link" href="#">github.com/your-username</a>
+      <a class="footer-link" href="#">LinkedIn</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
